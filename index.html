@@ -27,7 +27,6 @@
   </section>
 
   <script>
-    // Show today's date
     const today = new Date();
     const yyyyMMdd = today.toISOString().split('T')[0];
     const options = { weekday: 'long', month: 'long', day: 'numeric' };
@@ -43,14 +42,22 @@
         const tasksUl = document.getElementById("tasks");
         let hasTasks = false;
 
-        // Safely normalize date
         function normalizeDate(dateStr) {
           if (!dateStr) return "";
-          // Only allow strings that look like dates
-          if (!/^[\d\-\/]+$/.test(dateStr)) {
-            console.log(`Skipping non-date string: "${dateStr}"`);
-            return "";
+          if (dateStr.startsWith("Date(")) {
+            // Parse Google date format
+            const parts = dateStr.match(/Date\((\d+),(\d+),(\d+)\)/);
+            if (parts) {
+              const year = parts[1];
+              const month = String(Number(parts[2]) + 1).padStart(2, "0");
+              const day = String(parts[3]).padStart(2, "0");
+              return `${year}-${month}-${day}`;
+            } else {
+              console.log(`Invalid Date() format: "${dateStr}"`);
+              return "";
+            }
           }
+          // Fallback: parse standard date string
           const d = new Date(dateStr);
           if (isNaN(d.getTime())) {
             console.log(`Invalid date after parsing: "${dateStr}"`);
@@ -58,6 +65,8 @@
           }
           return d.toISOString().split('T')[0];
         }
+
+        console.log(`Today: "${yyyyMMdd}"`);
 
         rows.forEach(row => {
           const date = row.c[0]?.v || "";
@@ -68,16 +77,16 @@
           console.log(`Row date raw: "${date}"`);
 
           const normalized = normalizeDate(date);
-          if (normalized) {
-            console.log(`Normalized: "${normalized}", Today: "${yyyyMMdd}"`);
-            if (normalized === yyyyMMdd) {
-              const li = document.createElement("li");
-              li.textContent = `${employee}: ${task} (${equip})`;
-              tasksUl.appendChild(li);
-              hasTasks = true;
-            }
+          console.log(`Normalized: "${normalized}"`);
+
+          if (normalized === yyyyMMdd) {
+            console.log(`MATCH FOUND for "${normalized}"`);
+            const li = document.createElement("li");
+            li.textContent = `${employee}: ${task} (${equip})`;
+            tasksUl.appendChild(li);
+            hasTasks = true;
           } else {
-            console.log(`Skipping row with unparseable or empty date.`);
+            console.log(`NO MATCH: "${normalized}" !== "${yyyyMMdd}"`);
           }
         });
 
