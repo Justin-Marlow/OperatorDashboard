@@ -33,7 +33,6 @@
     const options = { weekday: 'long', month: 'long', day: 'numeric' };
     document.getElementById("date").textContent = today.toLocaleDateString(undefined, options);
 
-    // Your Spreadsheet ID here
     const sheetID = "19IpVfRqNUWQ8u5fclUgDNR-8Ns35jpFn0eS9TmsZNvc";
 
     fetch(`https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`)
@@ -44,11 +43,19 @@
         const tasksUl = document.getElementById("tasks");
         let hasTasks = false;
 
-        // Helper to safely normalize date
+        // Safely normalize date
         function normalizeDate(dateStr) {
           if (!dateStr) return "";
+          // Only allow strings that look like dates
+          if (!/^[\d\-\/]+$/.test(dateStr)) {
+            console.log(`Skipping non-date string: "${dateStr}"`);
+            return "";
+          }
           const d = new Date(dateStr);
-          if (isNaN(d.getTime())) return "";
+          if (isNaN(d.getTime())) {
+            console.log(`Invalid date after parsing: "${dateStr}"`);
+            return "";
+          }
           return d.toISOString().split('T')[0];
         }
 
@@ -60,10 +67,9 @@
 
           console.log(`Row date raw: "${date}"`);
 
-          if (date) {
-            const normalized = normalizeDate(date);
+          const normalized = normalizeDate(date);
+          if (normalized) {
             console.log(`Normalized: "${normalized}", Today: "${yyyyMMdd}"`);
-
             if (normalized === yyyyMMdd) {
               const li = document.createElement("li");
               li.textContent = `${employee}: ${task} (${equip})`;
@@ -71,7 +77,7 @@
               hasTasks = true;
             }
           } else {
-            console.log("Skipping row with empty date.");
+            console.log(`Skipping row with unparseable or empty date.`);
           }
         });
 
