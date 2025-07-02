@@ -33,6 +33,7 @@
     const options = { weekday: 'long', month: 'long', day: 'numeric' };
     document.getElementById("date").textContent = today.toLocaleDateString(undefined, options);
 
+    // Your Spreadsheet ID here
     const sheetID = "19IpVfRqNUWQ8u5fclUgDNR-8Ns35jpFn0eS9TmsZNvc";
 
     fetch(`https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`)
@@ -43,8 +44,10 @@
         const tasksUl = document.getElementById("tasks");
         let hasTasks = false;
 
+        // Helper to safely normalize date
         function normalizeDate(dateStr) {
           const d = new Date(dateStr);
+          if (isNaN(d.getTime())) return ""; // Invalid date
           return d.toISOString().split('T')[0];
         }
 
@@ -54,8 +57,11 @@
           const equip = row.c[2]?.v || "";
           const employee = row.c[3]?.v || "";
 
+          // Debug log
+          console.log(`Row date raw: "${date}"`);
+
           const normalized = normalizeDate(date);
-          console.log(`Row date raw: "${date}", normalized: "${normalized}", today: "${yyyyMMdd}"`);
+          console.log(`Normalized: "${normalized}", Today: "${yyyyMMdd}"`);
 
           if (normalized === yyyyMMdd) {
             const li = document.createElement("li");
