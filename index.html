@@ -46,8 +46,9 @@
 
         // Helper to safely normalize date
         function normalizeDate(dateStr) {
+          if (!dateStr) return "";
           const d = new Date(dateStr);
-          if (isNaN(d.getTime())) return ""; // Invalid date
+          if (isNaN(d.getTime())) return "";
           return d.toISOString().split('T')[0];
         }
 
@@ -57,17 +58,20 @@
           const equip = row.c[2]?.v || "";
           const employee = row.c[3]?.v || "";
 
-          // Debug log
           console.log(`Row date raw: "${date}"`);
 
-          const normalized = normalizeDate(date);
-          console.log(`Normalized: "${normalized}", Today: "${yyyyMMdd}"`);
+          if (date) {
+            const normalized = normalizeDate(date);
+            console.log(`Normalized: "${normalized}", Today: "${yyyyMMdd}"`);
 
-          if (normalized === yyyyMMdd) {
-            const li = document.createElement("li");
-            li.textContent = `${employee}: ${task} (${equip})`;
-            tasksUl.appendChild(li);
-            hasTasks = true;
+            if (normalized === yyyyMMdd) {
+              const li = document.createElement("li");
+              li.textContent = `${employee}: ${task} (${equip})`;
+              tasksUl.appendChild(li);
+              hasTasks = true;
+            }
+          } else {
+            console.log("Skipping row with empty date.");
           }
         });
 
