@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WTRBA Daily Dashboard (Tabletop)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.6.0/tabletop.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 1em; background: #f7f7f7; }
+    h1 { background: #004080; color: #fff; padding: 0.5em; }
+    ul { list-style: none; padding: 0; }
+    li { background: #e0e0e0; margin: 0.5em 0; padding: 0.75em; border-radius: 5px; }
+    .reminder { background: #ffe680; padding: 1em; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>West Tennessee River Basin Authority</h1>
+  <p id="date"></p>
+
+  <section>
+    <h2>Today's Assignments</h2>
+    <ul id="tasks"></ul>
+  </section>
+
+  <section class="reminder">
+    <h2>Reminder</h2>
+    <p>Fridays are mandatory work days unless otherwise notified.<br>
+    Please submit your timecard before 4 PM today.</p>
+  </section>
+
+<script>
+  // Show today's date
+  const today = new Date();
+  const yyyyMMdd = today.toISOString().split('T')[0];
+  const options = { weekday: 'long', month: 'long', day: 'numeric' };
+  document.getElementById("date").textContent = today.toLocaleDateString(undefined, options);
+
+  // Load data via Tabletop
+  Tabletop.init({
+    key: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQkdcmWbSZZmSwexhZjCdvv3MyFFnSlb6z6zHVIzumULNICiT36lAYmodNOUk13bWFWafyIJJ5OTOr3/pubhtml',
+    simpleSheet: true,
+    callback: function(data, tabletop) {
+      console.log("Data loaded:", data);
+      const tasksUl = document.getElementById("tasks");
+      let hasTasks = false;
+
+      // Helper function to normalize date
+      function normalizeDate(dateStr) {
+        const d = new Date(dateStr);
+        return d.toISOString().split('T')[0];
+      }
+
+      data.forEach(row => {
+        const normalized = normalizeDate(row.Date);
+        if (normalized === yyyyMMdd) {
+          const li = document.createElement("li");
+          li.textContent = `${row.Employee}: ${row["Task Description"]} (${row.Equipment})`;
+          tasksUl.appendChild(li);
+          hasTasks = true;
+        }
+      });
+
+      if (!hasTasks) {
+        const li = document.createElement("li");
+        li.textContent = "No assignments scheduled for today.";
+        tasksUl.appendChild(li);
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
