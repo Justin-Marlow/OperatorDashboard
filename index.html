@@ -4,16 +4,98 @@
   <meta charset="UTF-8">
   <title>WTRBA Daily Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 1em; background: #f7f7f7; }
-    h1 { background: #004080; color: #fff; padding: 0.5em; }
-    ul { list-style: none; padding: 0; }
-    li { background: #e0e0e0; margin: 0.5em 0; padding: 0.75em; border-radius: 5px; }
-    .reminder { background: #ffe680; padding: 1em; border-radius: 5px; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 1em;
+      background: #f7f7f7;
+      color: #333;
+    }
+    h1 {
+      background: #004080;
+      color: #fff;
+      padding: 0.5em;
+      margin-bottom: 0.5em;
+    }
+    section {
+      margin-bottom: 1em;
+    }
+    h2 {
+      margin-bottom: 0.5em;
+      color: #004080;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    li {
+      background: #e0e0e0;
+      margin: 0.5em 0;
+      padding: 0.75em;
+      border-radius: 5px;
+    }
+    .reminder {
+      background: #fff3cd;
+      border: 2px solid #ffecb5;
+      color: #664d03;
+      padding: 1em;
+      border-radius: 6px;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+    .org-structure {
+      background: #ddeeff;
+      border: 1px solid #aaccee;
+      padding: 1em;
+      border-radius: 6px;
+    }
+    .org-structure ul li {
+      background: #f0f4ff;
+    }
+    .org-structure ul li ul li {
+      background: #e8f0ff;
+      margin-left: 1em;
+    }
+    .contact {
+      font-size: 0.9em;
+      margin-top: 0.3em;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
   <h1>West Tennessee River Basin Authority</h1>
   <p id="date"></p>
+
+  <section class="org-structure">
+    <h2>Management Structure</h2>
+    <ul>
+      <li>
+        <strong>Project Coordinator:</strong> Dustin Bennett
+        <div class="contact">
+          📧 <a href="mailto:dustin.bennett@tn.gov">dustin.bennett@tn.gov</a><br>
+          📞 1 (731) 694-5556
+        </div>
+        <ul>
+          <li>
+            <strong>Amphibious Supervisor:</strong> Bryan Beard
+            <div class="contact">
+              📧 <a href="mailto:bryan.beard@tn.gov">bryan.beard@tn.gov</a><br>
+              📞 1 (731) 223-1046
+            </div>
+          </li>
+          <li>
+            <strong>Land-Based Supervisor:</strong> Chris Jackson
+            <div class="contact">
+              📧 <a href="mailto:christopher.l.jackson@tn.gov">christopher.l.jackson@tn.gov</a><br>
+              📞 1 (731) 676-3084
+            </div>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </section>
 
   <section>
     <h2>Today's Assignments</h2>
@@ -22,8 +104,9 @@
 
   <section class="reminder">
     <h2>Reminder</h2>
-    <p>Fridays are mandatory work days unless otherwise notified.<br>
-    Please submit your timecard before 4 PM today.</p>
+    Fridays are MANDATORY work days unless otherwise notified.
+    <br>
+    Please submit your timecard before leaving today.
   </section>
 
   <script>
@@ -45,28 +128,19 @@
         function normalizeDate(dateStr) {
           if (!dateStr) return "";
           if (dateStr.startsWith("Date(")) {
-            // Parse Google date format
             const parts = dateStr.match(/Date\((\d+),(\d+),(\d+)\)/);
             if (parts) {
               const year = parts[1];
               const month = String(Number(parts[2]) + 1).padStart(2, "0");
               const day = String(parts[3]).padStart(2, "0");
               return `${year}-${month}-${day}`;
-            } else {
-              console.log(`Invalid Date() format: "${dateStr}"`);
-              return "";
             }
-          }
-          // Fallback: parse standard date string
-          const d = new Date(dateStr);
-          if (isNaN(d.getTime())) {
-            console.log(`Invalid date after parsing: "${dateStr}"`);
             return "";
           }
+          const d = new Date(dateStr);
+          if (isNaN(d.getTime())) return "";
           return d.toISOString().split('T')[0];
         }
-
-        console.log(`Today: "${yyyyMMdd}"`);
 
         rows.forEach(row => {
           const date = row.c[0]?.v || "";
@@ -74,19 +148,13 @@
           const equip = row.c[2]?.v || "";
           const employee = row.c[3]?.v || "";
 
-          console.log(`Row date raw: "${date}"`);
-
           const normalized = normalizeDate(date);
-          console.log(`Normalized: "${normalized}"`);
 
           if (normalized === yyyyMMdd) {
-            console.log(`MATCH FOUND for "${normalized}"`);
             const li = document.createElement("li");
             li.textContent = `${employee}: ${task} (${equip})`;
             tasksUl.appendChild(li);
             hasTasks = true;
-          } else {
-            console.log(`NO MATCH: "${normalized}" !== "${yyyyMMdd}"`);
           }
         });
 
